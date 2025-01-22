@@ -1,0 +1,45 @@
+# Excluir diretório .vs (configurações do Visual Studio)
+.vs/
+
+# Excluir arquivos de build
+bin/
+obj/
+Debug/
+Release/
+
+# Excluir logs do Visual Studio
+*.log
+
+# Excluir pacotes NuGet baixados
+*.nupkg
+*.snupkg
+packages/
+
+# Excluir arquivos gerados por usuários
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Excluir arquivos temporários
+*.tmp
+*.temp
+*.cache
+*.ide
+
+# Excluir arquivos de configuração do Rider
+.idea/
+*.iml
+
+# Excluir arquivos de publicação
+publish/
+wwwroot/
+
+# Excluir arquivos do sistema
+Thumbs.db
+*.DS_Store
+
+# Excluir arquivos gerados pelo sistema operacional
+*.swp
+*.bak
+*~
