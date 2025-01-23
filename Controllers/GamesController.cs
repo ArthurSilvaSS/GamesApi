@@ -47,5 +47,24 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Game>> CreateGame([FromBody] Game game)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest($"Invalid data ... check and try again");
+
+                _context.Games.Add(game);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetGameById), new { id = game.Id }, game);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new game record");
+            }
+        }
     }
 }
