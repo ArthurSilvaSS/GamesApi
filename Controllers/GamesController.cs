@@ -30,5 +30,22 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
             }
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Game>> GetGameById(int id)
+        {
+            try { 
+                var game = await _context.Games.FindAsync(id);
+
+                if (game == null)
+                    return NotFound($"Game with ID {id} was not found");
+                
+                return Ok(game);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
+            }
+        }
     }
 }
