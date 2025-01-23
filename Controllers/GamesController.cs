@@ -96,5 +96,26 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error updating game record");
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteGame(int id)
+        {
+            try
+            {
+                var game = await _context.Games.FindAsync(id);
+
+                if (game == null)
+                    return NotFound($"Game with ID {id} was not found");
+
+                _context.Games.Remove(game);
+                await _context.SaveChangesAsync();
+
+                return Ok(game);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting game record");
+            }
+        }
     }
 }
