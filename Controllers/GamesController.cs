@@ -66,5 +66,35 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new game record");
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Game>> UpdateGame(int id, [FromBody] Game updateGame)
+        {
+            try
+            {
+                if (id != updateGame.Id)
+                    return BadRequest("The Id provided in the URL does not match the Id in the request body");
+
+                var gameToUpdate = await _context.Games.FindAsync(id);
+
+                if (gameToUpdate == null)
+                    return NotFound($"Game with ID {id} was not found");
+
+                gameToUpdate.Name = updateGame.Name;
+                gameToUpdate.Description = updateGame.Description;
+                gameToUpdate.imageUrl = updateGame.imageUrl;
+                gameToUpdate.Genre = updateGame.Genre;
+                gameToUpdate.Platform = updateGame.Platform;
+                gameToUpdate.Publisher = updateGame.Publisher;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(gameToUpdate);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating game record");
+            }
+        }
     }
 }
