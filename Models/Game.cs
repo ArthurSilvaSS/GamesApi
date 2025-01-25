@@ -9,5 +9,7 @@
         public string Genre { get; set; }
         public string Platform { get; set; }
         public string Publisher { get; set; }
+
+        public ICollection<GamePlataform> GamePlataforms{ get; set; }
     }
 }
