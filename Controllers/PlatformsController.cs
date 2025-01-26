@@ -64,6 +64,32 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new platform record");
             }
         }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Plataform>> UpdatePlatform(int id, Plataform platform)
+        {
+            try
+            {
+                if (id != platform.Id)
+                    return BadRequest("Platform ID mismatch");
+
+                var platformToUpdate = await _context.Plataforms.FindAsync(id);
+
+                if (platformToUpdate == null)
+                    return NotFound($"Platform with ID {id} was not found");
+
+                platformToUpdate.Name = platform.Name;
+                platformToUpdate.Description = platform.Description;
+                platformToUpdate.PlataformType = platform.PlataformType;
+
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating platform record");
+            }
+        }
     }
 
 }
