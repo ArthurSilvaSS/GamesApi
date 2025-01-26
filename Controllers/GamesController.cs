@@ -1,4 +1,5 @@
 ﻿using GamesAPI.Data;
+using GamesAPI.DTOs;
 using GamesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,31 @@ namespace GamesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Game>>> GetAllGames()
+        public async Task<ActionResult<IEnumerable<GameDetailsDTO>>> GetAllGames()
         {
             try
             {
-                var games = await _context.Games.ToListAsync();
+                var games = await _context.Games
+                    .Include(g => g.GamePlatforms)
+                    .ThenInclude(gp => gp.Platform)
+                    .Select(g => new GameDetailsDTO
+                    {
+                        Id = g.Id,
+                        Name = g.Name,
+                        Description = g.Description,
+                        ImageUrl = g.imageUrl,
+                        Genre = g.Genre,
+                        Publisher = g.Publisher,
+                        Platforms = g.GamePlatforms.Select(gp => new PlatformDTO
+                        {
+                            Id = gp.Platform.Id,
+                            Name = gp.Platform.Name,
+                            Description = gp.Platform.Description,
+                            PlatformType = gp.Platform.PlatformType
+                        }).ToList()
+
+                    }).ToListAsync();
+
                 return Ok(games);
             }
             catch (Exception)
@@ -32,14 +53,35 @@ namespace GamesAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Game>> GetGameById(int id)
+        public async Task<ActionResult<GameDetailsDTO>> GetGameById(int id)
         {
             try { 
-                var game = await _context.Games.FindAsync(id);
+               var game = await _context.Games
+                    .Include(g => g.GamePlatforms)
+                    .ThenInclude(gp => gp.Platform)
+                    .Where(g => g.Id == id)
+                    .Select(g => new GameDetailsDTO
+                    {
+                        Id = g.Id,
+                        Name = g.Name,
+                        Description = g.Description,
+                        ImageUrl = g.imageUrl,
+                        Genre = g.Genre,
+                        Publisher = g.Publisher,
+                        Platforms = g.GamePlatforms.Select(gp => new PlatformDTO
+                        {
+                            Id = gp.Platform.Id,
+                            Name = gp.Platform.Name,
+                            Description = gp.Platform.Description,
+                            PlatformType = gp.Platform.PlatformType
+                        }).ToList()
+
+                    })
+                    .FirstOrDefaultAsync(g => g.Id == id);
 
                 if (game == null)
                     return NotFound($"Game with ID {id} was not found");
-                
+
                 return Ok(game);
             }
             catch (Exception)
@@ -49,12 +91,21 @@ namespace GamesAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Game>> CreateGame([FromBody] Game game)
+        public async Task<ActionResult<Game>> PostGame(GameDTO gameDTO)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return BadRequest($"Invalid data ... check and try again");
+                var game = new Game
+                {
+                    Name = gameDTO.Name,
+                    Description = gameDTO.Description,
+                    imageUrl = gameDTO.ImageUrl,
+                    Genre = gameDTO.Genre,
+                    Publisher = gameDTO.Publisher,
+                    GamePlatforms = gameDTO.PlatformIds
+                    .Select(id => new GamePlatform { PlataformId = id })
+                    .ToList()
+                };
 
                 _context.Games.Add(game);
                 await _context.SaveChangesAsync();

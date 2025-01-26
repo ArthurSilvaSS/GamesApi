@@ -16,11 +16,11 @@ namespace GamesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Plataform>>> GetAllPlatforms()
+        public async Task<ActionResult<IEnumerable<Platform>>> GetAllPlatforms()
         {
             try
             {
-                var platforms = await _context.Plataforms.ToListAsync();
+                var platforms = await _context.Platforms.ToListAsync();
                 return Ok(platforms);
             }
             catch (Exception)
@@ -30,11 +30,11 @@ namespace GamesAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Plataform>> GetPlatformById(int id)
+        public async Task<ActionResult<Platform>> GetPlatformById(int id)
         {
             try
             {
-                var platform = await _context.Plataforms.FindAsync(id);
+                var platform = await _context.Platforms.FindAsync(id);
                 if (platform == null)
                     return NotFound($"Platform with ID {id} was not found");
                 return Ok(platform);
@@ -46,18 +46,21 @@ namespace GamesAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Plataform>> CreatePlatform(Plataform platform)
+        public async Task<ActionResult<Platform>> CreatePlatform(CreatePlatformDTO platformDTO)
         {
             try
             {
-                if (platform == null)
-                    return BadRequest("Platform data is required");
+                var platformToAdd = new Platform
+                {
+                    Name = platformDTO.Name,
+                    Description = platformDTO.Description,
+                    PlatformType = platformDTO.PlatformType
+                };
 
-                _context.Plataforms.Add(platform);
-
+                _context.Platforms.Add(platformToAdd);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetPlatformById), new { id = platform.Id }, platform);
+                return CreatedAtAction("GetPlatformById", new { id = platformToAdd.Id }, platformToAdd);
             }
             catch (Exception)
             {
@@ -66,21 +69,21 @@ namespace GamesAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Plataform>> UpdatePlatform(int id, Plataform platform)
+        public async Task<ActionResult<Platform>> UpdatePlatform(int id, Platform platform)
         {
             try
             {
                 if (id != platform.Id)
                     return BadRequest("Platform ID mismatch");
 
-                var platformToUpdate = await _context.Plataforms.FindAsync(id);
+                var platformToUpdate = await _context.Platforms.FindAsync(id);
 
                 if (platformToUpdate == null)
                     return NotFound($"Platform with ID {id} was not found");
 
                 platformToUpdate.Name = platform.Name;
                 platformToUpdate.Description = platform.Description;
-                platformToUpdate.PlataformType = platform.PlataformType;
+                platformToUpdate.PlatformType = platform.PlatformType;
 
                 await _context.SaveChangesAsync();
                 return NoContent();
@@ -92,16 +95,16 @@ namespace GamesAPI.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Plataform>> DeletePlatform(int id)
+        public async Task<ActionResult<Platform>> DeletePlatform(int id)
         {
             try
             {
-                var platformToDelete = await _context.Plataforms.FindAsync(id);
+                var platformToDelete = await _context.Platforms.FindAsync(id);
 
                 if (platformToDelete == null)
                     return NotFound($"Platform with ID {id} was not found");
 
-                _context.Plataforms.Remove(platformToDelete);
+                _context.Platforms.Remove(platformToDelete);
 
                 await _context.SaveChangesAsync();
                 return NoContent();
