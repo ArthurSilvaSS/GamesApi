@@ -10,6 +10,6 @@
         public string Platform { get; set; }
         public string Publisher { get; set; }
 
-        public ICollection<GamePlataform> GamePlataforms{ get; set; }
+        public ICollection<GamePlatform> GamePlatforms{ get; set; }
     }
 }
