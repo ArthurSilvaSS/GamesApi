@@ -17,63 +17,63 @@ namespace GamesAPI.Migrations
                 keyValue: 1);
 
             migrationBuilder.CreateTable(
-                name: "Plataforms",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Description = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PlataformType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Plataforms", x => x.Id);
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
+    name: "Platforms",
+    columns: table => new
+    {
+        Id = table.Column<int>(type: "int", nullable: false)
+            .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+        Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+            .Annotation("MySql:CharSet", "utf8mb4"),
+        Description = table.Column<string>(type: "varchar(200)", maxLength: 200, nullable: false)
+            .Annotation("MySql:CharSet", "utf8mb4"),
+        PlatformType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+            .Annotation("MySql:CharSet", "utf8mb4")
+    },
+    constraints: table =>
+    {
+        table.PrimaryKey("PK_Platforms", x => x.Id);
+    })
+    .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "GamePlataforms",
+                name: "GamePlatforms",
                 columns: table => new
                 {
                     GameId = table.Column<int>(type: "int", nullable: false),
-                    PlataformId = table.Column<int>(type: "int", nullable: false)
+                    PlatformId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GamePlataforms", x => new { x.GameId, x.PlataformId });
+                    table.PrimaryKey("PK_GamePlatforms", x => new { x.GameId, x.PlatformId });
                     table.ForeignKey(
-                        name: "FK_GamePlataforms_Games_GameId",
+                        name: "FK_GamePlatforms_Games_GameId",
                         column: x => x.GameId,
                         principalTable: "Games",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GamePlataforms_Plataforms_PlataformId",
-                        column: x => x.PlataformId,
-                        principalTable: "Plataforms",
+                        name: "FK_GamePlatforms_Plataforms_PlataformId",
+                        column: x => x.PlatformId,
+                        principalTable: "Platforms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GamePlataforms_PlataformId",
-                table: "GamePlataforms",
-                column: "PlataformId");
+                name: "IX_GamePlatforms_PlatformId",
+                table: "GamePlatforms",
+                column: "PlatformId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "GamePlataforms");
+                name: "GamePlatforms");
 
             migrationBuilder.DropTable(
-                name: "Plataforms");
+                name: "Platforms");
 
             migrationBuilder.InsertData(
                 table: "Games",
