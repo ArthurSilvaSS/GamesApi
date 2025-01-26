@@ -44,6 +44,26 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Plataform>> CreatePlatform(Plataform platform)
+        {
+            try
+            {
+                if (platform == null)
+                    return BadRequest("Platform data is required");
+
+                _context.Plataforms.Add(platform);
+
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetPlatformById), new { id = platform.Id }, platform);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new platform record");
+            }
+        }
     }
 
 }
