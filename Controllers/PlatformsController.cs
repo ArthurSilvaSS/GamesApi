@@ -90,6 +90,27 @@ namespace GamesAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error updating platform record");
             }
         }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Plataform>> DeletePlatform(int id)
+        {
+            try
+            {
+                var platformToDelete = await _context.Plataforms.FindAsync(id);
+
+                if (platformToDelete == null)
+                    return NotFound($"Platform with ID {id} was not found");
+
+                _context.Plataforms.Remove(platformToDelete);
+
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting platform record");
+            }
+        }
     }
 
 }
