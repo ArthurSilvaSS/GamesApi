@@ -1,4 +1,5 @@
 ﻿using GamesAPI.Data;
+using GamesAPI.DTOs;
 using GamesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -69,24 +70,32 @@ namespace GamesAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Platform>> UpdatePlatform(int id, Platform platform)
+        public async Task<ActionResult<PlatformDetailsDTO>> UpdatePlatform(int id, PlatformDTO platformDTO)
         {
             try
             {
-                if (id != platform.Id)
-                    return BadRequest("Platform ID mismatch");
-
                 var platformToUpdate = await _context.Platforms.FindAsync(id);
 
                 if (platformToUpdate == null)
+                {
                     return NotFound($"Platform with ID {id} was not found");
+                }
 
-                platformToUpdate.Name = platform.Name;
-                platformToUpdate.Description = platform.Description;
-                platformToUpdate.PlatformType = platform.PlatformType;
+                platformToUpdate.Name = platformDTO.Name;
+                platformToUpdate.Description = platformDTO.Description;
+                platformToUpdate.PlatformType = platformDTO.PlatformType;
 
                 await _context.SaveChangesAsync();
-                return NoContent();
+
+                var responseDTO = new PlatformDetailsDTO
+                {
+                    Id = platformToUpdate.Id,
+                    Name = platformToUpdate.Name,
+                    Description = platformToUpdate.Description,
+                    PlatformType = platformToUpdate.PlatformType
+                };
+
+                return Ok(responseDTO);
             }
             catch (Exception)
             {
