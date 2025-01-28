@@ -126,27 +126,36 @@ namespace GamesAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Game>> UpdateGame(int id, [FromBody] Game updateGame)
+        public async Task<ActionResult<Game>> UpdateGame(int id, [FromBody] GameDTO gameDTO)
         {
             try
             {
-                if (id != updateGame.Id)
-                    return BadRequest("The Id provided in the URL does not match the Id in the request body");
-
-                var gameToUpdate = await _context.Games.FindAsync(id);
+                var gameToUpdate = await _context.Games
+                    .Include(g => g.GamePlatforms)
+                    .FirstOrDefaultAsync(g => g.Id == id);
 
                 if (gameToUpdate == null)
                     return NotFound($"Game with ID {id} was not found");
 
-                gameToUpdate.Name = updateGame.Name;
-                gameToUpdate.Description = updateGame.Description;
-                gameToUpdate.imageUrl = updateGame.imageUrl;
-                gameToUpdate.Genre = updateGame.Genre;
-                gameToUpdate.Publisher = updateGame.Publisher;
+                gameToUpdate.Name = gameDTO.Name;
+                gameToUpdate.Description = gameDTO.Description;
+                gameToUpdate.imageUrl = gameDTO.ImageUrl;
+                gameToUpdate.Genre = gameDTO.Genre;
+                gameToUpdate.Publisher = gameDTO.Publisher;
+
+                if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
+                {
+                    _context.GamePlatforms.RemoveRange(gameToUpdate.GamePlatforms);
+
+                    gameToUpdate.GamePlatforms = gameDTO.PlatformIds.Select(platformId => new GamePlatform
+                    {
+                        PlatformId = platformId
+                    }).ToList();
+                }
 
                 await _context.SaveChangesAsync();
-
                 return Ok(gameToUpdate);
+
             }
             catch (Exception)
             {
