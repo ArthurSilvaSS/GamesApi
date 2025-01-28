@@ -41,10 +41,6 @@ namespace GamesAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Publisher")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -68,7 +64,7 @@ namespace GamesAPI.Migrations
 
                     b.HasKey("GameId", "PlatformId");
 
-                    b.HasIndex("PlataformId");
+                    b.HasIndex("PlatformId");
 
                     b.ToTable("GamePlatforms");
                 });
@@ -98,7 +94,7 @@ namespace GamesAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Plataforms");
+                    b.ToTable("Platforms");
                 });
 
             modelBuilder.Entity("GamesAPI.Models.GamePlatform", b =>

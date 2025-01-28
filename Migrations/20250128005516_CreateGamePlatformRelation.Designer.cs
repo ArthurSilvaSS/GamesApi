@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamesAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250125181752_AddPlatformEntity")]
-    partial class AddPlatformEntity
+    [Migration("20250128005516_CreateGamePlatformRelation")]
+    partial class CreateGamePlatformRelation
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,10 +44,6 @@ namespace GamesAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Publisher")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -61,22 +57,22 @@ namespace GamesAPI.Migrations
                     b.ToTable("Games");
                 });
 
-            modelBuilder.Entity("GamesAPI.Models.GamePlataform", b =>
+            modelBuilder.Entity("GamesAPI.Models.GamePlatform", b =>
                 {
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PlataformId")
+                    b.Property<int>("PlatformId")
                         .HasColumnType("int");
 
-                    b.HasKey("GameId", "PlataformId");
+                    b.HasKey("GameId", "PlatformId");
 
-                    b.HasIndex("PlataformId");
+                    b.HasIndex("PlatformId");
 
-                    b.ToTable("GamePlataforms");
+                    b.ToTable("GamePlatforms");
                 });
 
-            modelBuilder.Entity("GamesAPI.Models.Plataform", b =>
+            modelBuilder.Entity("GamesAPI.Models.Platform", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,43 +90,43 @@ namespace GamesAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<string>("PlataformType")
+                    b.Property<string>("PlatformType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Plataforms");
+                    b.ToTable("Platforms");
                 });
 
-            modelBuilder.Entity("GamesAPI.Models.GamePlataform", b =>
+            modelBuilder.Entity("GamesAPI.Models.GamePlatform", b =>
                 {
                     b.HasOne("GamesAPI.Models.Game", "Game")
-                        .WithMany("GamePlataforms")
+                        .WithMany("GamePlatforms")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GamesAPI.Models.Plataform", "Plataform")
-                        .WithMany("GamePlataforms")
-                        .HasForeignKey("PlataformId")
+                    b.HasOne("GamesAPI.Models.Platform", "Platform")
+                        .WithMany("GamePlatforms")
+                        .HasForeignKey("PlatformId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Game");
 
-                    b.Navigation("Plataform");
+                    b.Navigation("Platform");
                 });
 
             modelBuilder.Entity("GamesAPI.Models.Game", b =>
                 {
-                    b.Navigation("GamePlataforms");
+                    b.Navigation("GamePlatforms");
                 });
 
-            modelBuilder.Entity("GamesAPI.Models.Plataform", b =>
+            modelBuilder.Entity("GamesAPI.Models.Platform", b =>
                 {
-                    b.Navigation("GamePlataforms");
+                    b.Navigation("GamePlatforms");
                 });
 #pragma warning restore 612, 618
         }

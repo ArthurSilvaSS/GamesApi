@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GamesAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250126210936_FixPlatformModel")]
-    partial class FixPlatformModel
+    [Migration("20250128002017_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,14 +66,14 @@ namespace GamesAPI.Migrations
                     b.Property<int>("GameId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PlataformId")
+                    b.Property<int>("PlatformId")
                         .HasColumnType("int");
 
-                    b.HasKey("GameId", "PlataformId");
+                    b.HasKey("GameId", "PlatformId");
 
-                    b.HasIndex("PlataformId");
+                    b.HasIndex("PlatformId");
 
-                    b.ToTable("GamePlataforms");
+                    b.ToTable("GamePlatforms");
                 });
 
             modelBuilder.Entity("GamesAPI.Models.Platform", b =>
@@ -101,7 +101,7 @@ namespace GamesAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Plataforms");
+                    b.ToTable("Platforms");
                 });
 
             modelBuilder.Entity("GamesAPI.Models.GamePlatform", b =>
@@ -114,7 +114,7 @@ namespace GamesAPI.Migrations
 
                     b.HasOne("GamesAPI.Models.Platform", "Platform")
                         .WithMany("GamePlatforms")
-                        .HasForeignKey("PlataformId")
+                        .HasForeignKey("PlatformId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
