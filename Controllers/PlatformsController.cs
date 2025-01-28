@@ -17,11 +17,20 @@ namespace GamesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Platform>>> GetAllPlatforms()
+        public async Task<ActionResult<IEnumerable<PlatformDTO>>> GetAllPlatforms()
         {
             try
             {
-                var platforms = await _context.Platforms.ToListAsync();
+                var platforms = await _context.Platforms
+                    .Include(p => p.GamePlatforms)
+                    .Select(p => new PlatformDTO
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        PlatformType = p.PlatformType
+                    }).ToListAsync();
+
                 return Ok(platforms);
             }
             catch (Exception)
