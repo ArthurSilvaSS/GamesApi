@@ -2,6 +2,7 @@
 using GamesAPI.DTOs;
 using GamesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace GamesAPI.Controllers
@@ -55,29 +56,30 @@ namespace GamesAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<GameDetailsDTO>> GetGameById(int id)
         {
-            try { 
-               var game = await _context.Games
-                    .Include(g => g.GamePlatforms)
-                    .ThenInclude(gp => gp.Platform)
-                    .Where(g => g.Id == id)
-                    .Select(g => new GameDetailsDTO
-                    {
-                        Id = g.Id,
-                        Name = g.Name,
-                        Description = g.Description,
-                        ImageUrl = g.imageUrl,
-                        Genre = g.Genre,
-                        Publisher = g.Publisher,
-                        Platforms = g.GamePlatforms.Select(gp => new PlatformDTO
-                        {
-                            Id = gp.Platform.Id,
-                            Name = gp.Platform.Name,
-                            Description = gp.Platform.Description,
-                            PlatformType = gp.Platform.PlatformType
-                        }).ToList()
+            try
+            {
+                var game = await _context.Games
+                     .Include(g => g.GamePlatforms)
+                     .ThenInclude(gp => gp.Platform)
+                     .Where(g => g.Id == id)
+                     .Select(g => new GameDetailsDTO
+                     {
+                         Id = g.Id,
+                         Name = g.Name,
+                         Description = g.Description,
+                         ImageUrl = g.imageUrl,
+                         Genre = g.Genre,
+                         Publisher = g.Publisher,
+                         Platforms = g.GamePlatforms.Select(gp => new PlatformDTO
+                         {
+                             Id = gp.Platform.Id,
+                             Name = gp.Platform.Name,
+                             Description = gp.Platform.Description,
+                             PlatformType = gp.Platform.PlatformType
+                         }).ToList()
 
-                    })
-                    .FirstOrDefaultAsync(g => g.Id == id);
+                     })
+                     .FirstOrDefaultAsync(g => g.Id == id);
 
                 if (game == null)
                     return NotFound($"Game with ID {id} was not found");
@@ -91,7 +93,7 @@ namespace GamesAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Game>> PostGame(GameDTO gameDTO)
+        public async Task<ActionResult<Game>> CreateGame([FromBody] GameDTO gameDTO)
         {
             try
             {
@@ -101,11 +103,16 @@ namespace GamesAPI.Controllers
                     Description = gameDTO.Description,
                     imageUrl = gameDTO.ImageUrl,
                     Genre = gameDTO.Genre,
-                    Publisher = gameDTO.Publisher,
-                    GamePlatforms = gameDTO.PlatformIds
-                    .Select(id => new GamePlatform { PlataformId = id })
-                    .ToList()
+                    Publisher = gameDTO.Publisher
                 };
+
+                if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
+                {
+                    game.GamePlatforms = gameDTO.PlatformIds.Select(platformId => new GamePlatform
+                    {
+                        PlatformId = platformId
+                    }).ToList();
+                }
 
                 _context.Games.Add(game);
                 await _context.SaveChangesAsync();
@@ -135,7 +142,6 @@ namespace GamesAPI.Controllers
                 gameToUpdate.Description = updateGame.Description;
                 gameToUpdate.imageUrl = updateGame.imageUrl;
                 gameToUpdate.Genre = updateGame.Genre;
-                gameToUpdate.Platform = updateGame.Platform;
                 gameToUpdate.Publisher = updateGame.Publisher;
 
                 await _context.SaveChangesAsync();

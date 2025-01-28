@@ -5,17 +5,16 @@ namespace GamesAPI.Data
 {
     public class AppDbContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){ }
+        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
         public DbSet<Game> Games { get; set; }
         public DbSet<Platform> Platforms { get; set; }
-        public DbSet<GamePlatform> GamePlataforms { get; set; }
+        public DbSet<GamePlatform> GamePlatforms { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<GamePlatform>()
-                .HasKey(gp => new { gp.GameId, gp.PlataformId });
+                .HasKey(gp => new { gp.GameId, gp.PlatformId });
 
             modelBuilder.Entity<GamePlatform>()
                 .HasOne(gp => gp.Game)
@@ -25,7 +24,9 @@ namespace GamesAPI.Data
             modelBuilder.Entity<GamePlatform>()
                 .HasOne(gp => gp.Platform)
                 .WithMany(p => p.GamePlatforms)
-                .HasForeignKey(gp => gp.PlataformId);
+                .HasForeignKey(gp => gp.PlatformId);
         }
+
     }
 }
+
