@@ -1,6 +1,7 @@
 ﻿using GamesAPI.Data;
 using GamesAPI.DTOs;
 using GamesAPI.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -108,6 +109,35 @@ namespace GamesAPI.Controllers
                 return HandleException();
             }
         }
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<PlatformDTO>> PartialUpdatePlatform(int id,[FromBody] JsonPatchDocument<PlatformDTO> patchDoc)
+        {
+            try
+            {
+                var platform = await GetPlatformByIdAsync(id);
+                if (platform == null)
+                    return NotFound($"Platform with ID {id} was not found");
+
+                var platformDTO = MapToPlatformDTO(platform);
+                patchDoc.ApplyTo(platformDTO, ModelState);
+
+                if (!TryValidateModel(platformDTO))
+                    return BadRequest(ModelState);
+
+                platform.Name = platformDTO.Name;
+                platform.Description = platformDTO.Description;
+                platform.PlatformType = platformDTO.PlatformType;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(platformDTO);
+            }
+            catch (Exception)
+            {
+                return HandleException();
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<Platform>> DeletePlatform(int id)
         {
