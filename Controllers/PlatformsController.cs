@@ -42,12 +42,20 @@ namespace GamesAPI.Controllers
         {
             try
             {
-                var platform = await _context.Platforms.FirstOrDefaultAsync(p => p.Id == id);
+                var platform = await _context.Platforms
+                .Where(p => p.Id == id)
+                .Select(p => new PlatformDTO 
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    PlatformType = p.PlatformType
+                })
+                .FirstOrDefaultAsync();
 
                 if (platform == null)
                     return NotFound($"Platform with ID {id} was not found");
 
-                var platformDTO = MapToPlatformDTO(platform);
                 return Ok(platform);
             }
             catch (Exception)
@@ -70,7 +78,7 @@ namespace GamesAPI.Controllers
                 _context.Platforms.Add(platformToAdd);
                 await _context.SaveChangesAsync();
 
-               var responseDTO = MapToPlatformDetailsDTO(platformToAdd);
+                var responseDTO = MapToPlatformDTO(platformToAdd);
                 return CreatedAtAction("GetPlatformById", new { id = responseDTO.Id }, responseDTO);
             }
             catch (Exception)
@@ -128,17 +136,6 @@ namespace GamesAPI.Controllers
                 Name = platform.Name,
                 Description = platform.Description,
                 PlatformType = platform.PlatformType
-            };
-        }
-
-        private static PlatformDetailsDTO MapToPlatformDetailsDTO(Platform? platformToUpdate)
-        {
-            return new PlatformDetailsDTO
-            {
-                Id = platformToUpdate.Id,
-                Name = platformToUpdate.Name,
-                Description = platformToUpdate.Description,
-                PlatformType = platformToUpdate.PlatformType
             };
         }
 
