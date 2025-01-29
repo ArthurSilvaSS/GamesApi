@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace GamesAPI.DTOs
+namespace GamesAPI.DTOs.Platforms
 {
     public class PlatformDTO
     {

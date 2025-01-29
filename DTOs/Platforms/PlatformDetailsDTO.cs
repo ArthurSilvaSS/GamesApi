@@ -1,15 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace GamesAPI.DTOs
+﻿namespace GamesAPI.DTOs.Platforms
 {
-    public class CreatePlatformDTO
+    public class PlatformDetailsDTO
     {
-        [Required]
+        public int Id { get; set; }
         public string Name { get; set; }
-
         public string Description { get; set; }
-
-        [Required]
         public string PlatformType { get; set; }
     }
 }

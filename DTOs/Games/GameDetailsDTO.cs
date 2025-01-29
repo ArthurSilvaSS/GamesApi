@@ -1,4 +1,6 @@
-﻿namespace GamesAPI.DTOs
+﻿using GamesAPI.DTOs.Platforms;
+
+namespace GamesAPI.DTOs.Games
 {
     public class GameDetailsDTO
     {

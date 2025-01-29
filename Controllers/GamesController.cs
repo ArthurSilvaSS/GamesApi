@@ -1,5 +1,6 @@
 ﻿using GamesAPI.Data;
-using GamesAPI.DTOs;
+using GamesAPI.DTOs.Games;
+using GamesAPI.DTOs.Platforms;
 using GamesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis;

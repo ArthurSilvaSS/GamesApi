@@ -1,5 +1,5 @@
 ﻿using GamesAPI.Data;
-using GamesAPI.DTOs;
+using GamesAPI.DTOs.Platforms;
 using GamesAPI.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -65,7 +65,7 @@ namespace GamesAPI.Controllers
             }
         }
         [HttpPost]
-        public async Task<ActionResult<Platform>> CreatePlatform(CreatePlatformDTO platformDTO)
+        public async Task<ActionResult<Platform>> CreatePlatform(PlatformCreateDTO platformDTO)
         {
             try
             {
@@ -137,7 +137,6 @@ namespace GamesAPI.Controllers
                 return HandleException();
             }
         }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult<Platform>> DeletePlatform(int id)
         {
