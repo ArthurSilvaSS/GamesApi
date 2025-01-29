@@ -20,8 +20,15 @@ namespace GamesAPI.Controllers
         {
             try
             {
-                var platforms = await _context.Platforms.ToListAsync();
-                var platformDTOs = platforms.Select(p => MapToPlatformDTO(p)).ToList();
+                var platforms = await _context.Platforms
+                .Select(p => new PlatformDTO
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    PlatformType = p.PlatformType
+                })
+                .ToListAsync();
 
                 return Ok(platforms);
             }
