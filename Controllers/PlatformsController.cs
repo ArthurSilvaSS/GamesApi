@@ -15,46 +15,39 @@ namespace GamesAPI.Controllers
         {
             _context = context;
         }
-
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PlatformDTO>>> GetAllPlatforms()
         {
             try
             {
-                var platforms = await _context.Platforms
-                    .Include(p => p.GamePlatforms)
-                    .Select(p => new PlatformDTO
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Description = p.Description,
-                        PlatformType = p.PlatformType
-                    }).ToListAsync();
+                var platforms = await _context.Platforms.ToListAsync();
+                var platformDTOs = platforms.Select(p => MapToPlatformDTO(p)).ToList();
 
                 return Ok(platforms);
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
+                return HandleException();
             }
         }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<Platform>> GetPlatformById(int id)
+        public async Task<ActionResult<PlatformDTO>> GetPlatformById(int id)
         {
             try
             {
-                var platform = await _context.Platforms.FindAsync(id);
+                var platform = await _context.Platforms.FirstOrDefaultAsync(p => p.Id == id);
+
                 if (platform == null)
                     return NotFound($"Platform with ID {id} was not found");
+
+                var platformDTO = MapToPlatformDTO(platform);
                 return Ok(platform);
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
+                return HandleException();
             }
         }
-
         [HttpPost]
         public async Task<ActionResult<Platform>> CreatePlatform(CreatePlatformDTO platformDTO)
         {
@@ -70,54 +63,42 @@ namespace GamesAPI.Controllers
                 _context.Platforms.Add(platformToAdd);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction("GetPlatformById", new { id = platformToAdd.Id }, platformToAdd);
+               var responseDTO = MapToPlatformDetailsDTO(platformToAdd);
+                return CreatedAtAction("GetPlatformById", new { id = responseDTO.Id }, responseDTO);
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new platform record");
+                return HandleException();
             }
         }
-
         [HttpPut("{id}")]
-        public async Task<ActionResult<PlatformDetailsDTO>> UpdatePlatform(int id, PlatformDTO platformDTO)
+        public async Task<ActionResult<PlatformDTO>> UpdatePlatform(int id, PlatformDTO platformDTO)
         {
             try
             {
-                var platformToUpdate = await _context.Platforms.FindAsync(id);
-
+                var platformToUpdate = await GetPlatformByIdAsync(id);
                 if (platformToUpdate == null)
-                {
                     return NotFound($"Platform with ID {id} was not found");
-                }
-
+                
                 platformToUpdate.Name = platformDTO.Name;
                 platformToUpdate.Description = platformDTO.Description;
                 platformToUpdate.PlatformType = platformDTO.PlatformType;
 
                 await _context.SaveChangesAsync();
 
-                var responseDTO = new PlatformDetailsDTO
-                {
-                    Id = platformToUpdate.Id,
-                    Name = platformToUpdate.Name,
-                    Description = platformToUpdate.Description,
-                    PlatformType = platformToUpdate.PlatformType
-                };
-
-                return Ok(responseDTO);
+                return Ok(platformDTO);
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating platform record");
+                return HandleException();
             }
         }
-
         [HttpDelete("{id}")]
         public async Task<ActionResult<Platform>> DeletePlatform(int id)
         {
             try
             {
-                var platformToDelete = await _context.Platforms.FindAsync(id);
+                var platformToDelete = await GetPlatformByIdAsync(id);
 
                 if (platformToDelete == null)
                     return NotFound($"Platform with ID {id} was not found");
@@ -129,8 +110,39 @@ namespace GamesAPI.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting platform record");
+                return HandleException();
             }
+        }
+        private PlatformDTO MapToPlatformDTO(Platform platform)
+        {
+            return new PlatformDTO
+            {
+                Id = platform.Id,
+                Name = platform.Name,
+                Description = platform.Description,
+                PlatformType = platform.PlatformType
+            };
+        }
+
+        private static PlatformDetailsDTO MapToPlatformDetailsDTO(Platform? platformToUpdate)
+        {
+            return new PlatformDetailsDTO
+            {
+                Id = platformToUpdate.Id,
+                Name = platformToUpdate.Name,
+                Description = platformToUpdate.Description,
+                PlatformType = platformToUpdate.PlatformType
+            };
+        }
+
+        private async Task<Platform?> GetPlatformByIdAsync(int id)
+        {
+            return await _context.Platforms.FindAsync(id);
+        }
+
+        private ActionResult HandleException()
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting platform record");
         }
     }
 
