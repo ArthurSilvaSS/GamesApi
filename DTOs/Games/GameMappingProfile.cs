@@ -8,8 +8,8 @@ namespace GamesAPI.DTOs.Games
     {
         public GameMappingProfile()
         {
-            CreateMap<Game, GameDetailsDTO>();
-            CreateMap<GameDTO, Game>();
+            CreateMap<Game, GameDetailsDTO>()
+                .ForMember(dest => dest.Platforms, opt => opt.MapFrom(src => src.GamePlatforms.Select(gp => gp.Platform)));
             CreateMap<Platform, PlatformDTO>();
                 
         }

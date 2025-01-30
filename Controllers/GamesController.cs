@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 using GamesAPI.Data;
 using GamesAPI.DTOs.Games;
-using GamesAPI.DTOs.Platforms;
 using GamesAPI.Models;
+using GamesAPI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 
 namespace GamesAPI.Controllers
@@ -14,161 +13,58 @@ namespace GamesAPI.Controllers
 
     public class GamesController : ControllerBase
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
-
-        public GamesController(AppDbContext context, IMapper mapper)
+        private readonly IGameService _gameService;
+       
+        public GamesController(IGameService gameService)
         {
-            _context = context;
-            _mapper = mapper;
+            _gameService = gameService;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDetailsDTO>>> GetAllGames()
         {
-            try
-            {
-                var games = await _context.Games
-                    .Include(g => g.GamePlatforms)
-                    .ThenInclude(gp => gp.Platform)
-                    .Select(g => new GameDetailsDTO
-                    {
-                        Id = g.Id,
-                        Name = g.Name,
-                        Description = g.Description,
-                        ImageUrl = g.imageUrl,
-                        Genre = g.Genre,
-                        Publisher = g.Publisher,
-                        Platforms = g.GamePlatforms.Select(gp => new PlatformDTO
-                        {
-                            Id = gp.Platform.Id,
-                            Name = gp.Platform.Name,
-                            Description = gp.Platform.Description,
-                            PlatformType = gp.Platform.PlatformType
-                        }).ToList()
-
-                    }).ToListAsync();
-
-                return Ok(games);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
-            }
+            var games = await _gameService.GetAllGames();
+            return Ok(games);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<GameDetailsDTO>> GetGameById(int id)
         {
-            try
-            {
-                var game = await _context.Games
-                     .Include(g => g.GamePlatforms)
-                     .ThenInclude(gp => gp.Platform)
-                     .FirstOrDefaultAsync(g => g.Id == id);
+            var game =await _gameService.GetGameById(id);
+            if (game == null)
+               throw new KeyNotFoundException($"Game with ID {id} not found");
 
-                if (game == null)
-                    return NotFound($"Game with ID {id} was not found");
-
-                var gameDetailsDTO = _mapper.Map<GameDetailsDTO>(game);
-                return Ok(gameDetailsDTO);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database");
-            }
+            return Ok(game);
         }
 
         [HttpPost]
         public async Task<ActionResult<Game>> CreateGame([FromBody] GameDTO gameDTO)
         {
-            try
-            {
-                var game = new Game
-                {
-                    Name = gameDTO.Name,
-                    Description = gameDTO.Description,
-                    imageUrl = gameDTO.ImageUrl,
-                    Genre = gameDTO.Genre,
-                    Publisher = gameDTO.Publisher
-                };
+           var CreatedGame = await _gameService.CreateGame(gameDTO);
 
-                if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
-                {
-                    game.GamePlatforms = gameDTO.PlatformIds.Select(platformId => new GamePlatform
-                    {
-                        PlatformId = platformId
-                    }).ToList();
-                }
-
-                _context.Games.Add(game);
-                await _context.SaveChangesAsync();
-
-                return CreatedAtAction(nameof(GetGameById), new { id = game.Id }, game);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error creating new game record");
-            }
+           return CreatedAtAction(nameof(GetGameById), new {id = CreatedGame.Id}, CreatedGame);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<Game>> UpdateGame(int id, [FromBody] GameDTO gameDTO)
+        public async Task<ActionResult<GameDetailsDTO>> UpdateGame(int id, [FromBody] GameDTO gameDTO)
         {
-            try
-            {
-                var gameToUpdate = await _context.Games
-                    .Include(g => g.GamePlatforms)
-                    .FirstOrDefaultAsync(g => g.Id == id);
+           var gameToUpdate = await _gameService.UpdateGame(id, gameDTO);
 
-                if (gameToUpdate == null)
-                    return NotFound($"Game with ID {id} was not found");
+            if (gameToUpdate == null)
+                return NotFound($"Game with ID {id} not found");
 
-                gameToUpdate.Name = gameDTO.Name;
-                gameToUpdate.Description = gameDTO.Description;
-                gameToUpdate.imageUrl = gameDTO.ImageUrl;
-                gameToUpdate.Genre = gameDTO.Genre;
-                gameToUpdate.Publisher = gameDTO.Publisher;
-
-                if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
-                {
-                    _context.GamePlatforms.RemoveRange(gameToUpdate.GamePlatforms);
-
-                    gameToUpdate.GamePlatforms = gameDTO.PlatformIds.Select(platformId => new GamePlatform
-                    {
-                        PlatformId = platformId
-                    }).ToList();
-                }
-
-                await _context.SaveChangesAsync();
-                return Ok(gameToUpdate);
-
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error updating game record");
-            }
+            return Ok(gameToUpdate);
         }
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteGame(int id)
         {
-            try
-            {
-                var game = await _context.Games.FindAsync(id);
+            var result = await _gameService.DeleteGame(id);
 
-                if (game == null)
-                    return NotFound($"Game with ID {id} was not found");
+            if (!result)
+                return NotFound($"Game with ID {id} not found");
 
-                _context.Games.Remove(game);
-                await _context.SaveChangesAsync();
-
-                return Ok(game);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting game record");
-            }
+            return NoContent();
         }
     }
 }
