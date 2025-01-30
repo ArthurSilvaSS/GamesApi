@@ -1,4 +1,5 @@
-﻿using GamesAPI.Data;
+﻿using AutoMapper;
+using GamesAPI.Data;
 using GamesAPI.DTOs.Games;
 using GamesAPI.DTOs.Platforms;
 using GamesAPI.Models;
@@ -14,10 +15,12 @@ namespace GamesAPI.Controllers
     public class GamesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
 
-        public GamesController(AppDbContext context)
+        public GamesController(AppDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -62,30 +65,13 @@ namespace GamesAPI.Controllers
                 var game = await _context.Games
                      .Include(g => g.GamePlatforms)
                      .ThenInclude(gp => gp.Platform)
-                     .Where(g => g.Id == id)
-                     .Select(g => new GameDetailsDTO
-                     {
-                         Id = g.Id,
-                         Name = g.Name,
-                         Description = g.Description,
-                         ImageUrl = g.imageUrl,
-                         Genre = g.Genre,
-                         Publisher = g.Publisher,
-                         Platforms = g.GamePlatforms.Select(gp => new PlatformDTO
-                         {
-                             Id = gp.Platform.Id,
-                             Name = gp.Platform.Name,
-                             Description = gp.Platform.Description,
-                             PlatformType = gp.Platform.PlatformType
-                         }).ToList()
-
-                     })
                      .FirstOrDefaultAsync(g => g.Id == id);
 
                 if (game == null)
                     return NotFound($"Game with ID {id} was not found");
 
-                return Ok(game);
+                var gameDetailsDTO = _mapper.Map<GameDetailsDTO>(game);
+                return Ok(gameDetailsDTO);
             }
             catch (Exception)
             {
