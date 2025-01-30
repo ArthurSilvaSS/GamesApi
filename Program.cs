@@ -1,4 +1,5 @@
 using GamesAPI.Data;
+using GamesAPI.Middlewares;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,7 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty;
     });
 }
+app.UseMiddleware<ExeptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
 
