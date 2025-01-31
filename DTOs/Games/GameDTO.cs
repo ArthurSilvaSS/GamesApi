@@ -11,7 +11,6 @@ namespace GamesAPI.DTOs.Games
         [StringLength(500, ErrorMessage = "Description is too long")]
         public string Description { get; set; }
 
-        [Url(ErrorMessage = "Invalid URL")]
         public string ImageUrl { get; set; }
 
         [Required(ErrorMessage = "Genre is required")]

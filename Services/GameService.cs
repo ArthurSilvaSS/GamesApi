@@ -40,40 +40,82 @@ namespace GamesAPI.Services
         {
             var game = _mapper.Map<Game>(gameDTO);
 
-            if (gameDTO.PlatformIds != null)
-            {
-                game.GamePlatforms = gameDTO.PlatformIds
-                    .Select(platformId => new GamePlatform { PlatformId = platformId })
-                    .ToList();
-            }
             _context.Games.Add(game);
             await _context.SaveChangesAsync();
+
+            if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
+            {
+                var platformsExist = await _context.Platforms
+                    .Where(p => gameDTO.PlatformIds.Contains(p.Id))
+                    .CountAsync();
+
+                if (platformsExist != gameDTO.PlatformIds.Count)
+                    throw new Exception("Uma ou mais plataformas não existem");
+
+                game.GamePlatforms = gameDTO.PlatformIds
+                    .Select(platformId => new GamePlatform
+                    {
+                        GameId = game.Id,
+                        PlatformId = platformId
+                    })
+                    .ToList();
+
+                await _context.SaveChangesAsync();
+            }
+
+            await _context.Entry(game)
+                .Collection(g => g.GamePlatforms)
+                .Query()
+                .Include(gp => gp.Platform)
+                .LoadAsync();
 
             return _mapper.Map<GameDetailsDTO>(game);
         }
 
-        public async Task<GameDetailsDTO?> UpdateGame(int id, GameDTO gameDTO)
+        public async Task<GameDetailsDTO> UpdateGame(int id, GameDTO gameDTO)
         {
-            var game = await _context.Games
+          
+            var gameToUpdate = await _context.Games
                 .Include(g => g.GamePlatforms)
                 .FirstOrDefaultAsync(g => g.Id == id);
-            if (game == null)
+
+            if (gameToUpdate == null)
                 return null;
 
-            _mapper.Map(gameDTO, game);
-
-            if (gameDTO.PlatformIds != null)
+            if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
             {
-                _context.GamePlatforms.RemoveRange(game.GamePlatforms);
+                var existingPlatforms = await _context.Platforms
+                    .Where(p => gameDTO.PlatformIds.Contains(p.Id))
+                    .ToListAsync();
 
-                game.GamePlatforms = gameDTO.PlatformIds
-                    .Select(platformId => new GamePlatform { PlatformId = platformId })
+                if (existingPlatforms.Count != gameDTO.PlatformIds.Count)
+                    throw new Exception("One or more platforms do not exist");
+            }
+
+            _mapper.Map(gameDTO, gameToUpdate);
+
+            _context.GamePlatforms.RemoveRange(gameToUpdate.GamePlatforms);
+
+            if (gameDTO.PlatformIds != null && gameDTO.PlatformIds.Any())
+            {
+                gameToUpdate.GamePlatforms = gameDTO.PlatformIds
+                    .Select(platformId => new GamePlatform
+                    {
+                        GameId = gameToUpdate.Id,
+                        PlatformId = platformId
+                    })
                     .ToList();
             }
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<GameDetailsDTO>(game);
+            await _context.Entry(gameToUpdate)
+                .Collection(g => g.GamePlatforms)
+                .Query()
+                .Include(gp => gp.Platform)
+                .LoadAsync();
+
+            return _mapper.Map<GameDetailsDTO>(gameToUpdate);
         }
         public async Task<bool> DeleteGame(int id)
         {
