@@ -1,6 +1,6 @@
 ﻿using GamesAPI.DTOs.Games;
 
-namespace GamesAPI.Services
+namespace GamesAPI.Services.Games
 {
     public interface IGameService
     {

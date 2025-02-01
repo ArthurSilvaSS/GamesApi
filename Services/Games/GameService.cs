@@ -4,7 +4,7 @@ using GamesAPI.DTOs.Games;
 using GamesAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GamesAPI.Services
+namespace GamesAPI.Services.Games
 {
     public class GameService : IGameService
     {
@@ -74,7 +74,7 @@ namespace GamesAPI.Services
 
         public async Task<GameDetailsDTO> UpdateGame(int id, GameDTO gameDTO)
         {
-          
+
             var gameToUpdate = await _context.Games
                 .Include(g => g.GamePlatforms)
                 .FirstOrDefaultAsync(g => g.Id == id);

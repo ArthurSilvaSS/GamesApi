@@ -1,6 +1,6 @@
 using GamesAPI.Data;
 using GamesAPI.Middlewares;
-using GamesAPI.Services;
+using GamesAPI.Services.Games;
 using GamesAPI.Services.Platform;
 using Microsoft.EntityFrameworkCore;
 

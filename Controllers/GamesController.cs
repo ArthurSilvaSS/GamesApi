@@ -2,7 +2,7 @@
 using GamesAPI.Data;
 using GamesAPI.DTOs.Games;
 using GamesAPI.Models;
-using GamesAPI.Services;
+using GamesAPI.Services.Games;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
