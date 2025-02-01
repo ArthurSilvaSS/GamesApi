@@ -3,6 +3,7 @@ using GamesAPI.Data;
 using GamesAPI.DTOs.Games;
 using GamesAPI.Models;
 using GamesAPI.Services.Games;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,12 @@ namespace GamesAPI.Controllers
                 return NotFound($"Game with ID {id} not found");
 
             return Ok(gameToUpdate);
+        }
+        [HttpPatch("{id}")]
+        public async Task<ActionResult<GameDetailsDTO>> PartialUpdateGame(int id, [FromBody] JsonPatchDocument<GameUpdateDTO> patchDoc)
+        {
+            var updatedGame = await _gameService.PartialUpdateGame(id, patchDoc);
+            return updatedGame != null ? Ok(updatedGame) : NotFound($"Game with ID {id} not found");
         }
 
         [HttpDelete("{id}")]

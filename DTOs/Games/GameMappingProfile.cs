@@ -11,8 +11,8 @@ namespace GamesAPI.DTOs.Games
             CreateMap<Game, GameDetailsDTO>()
                 .ForMember(dest => dest.Platforms,
                            opt => opt.MapFrom(src => src.GamePlatforms.Select(gp => gp.Platform)));
-            CreateMap<GameDTO, Game>()
-                .ForMember(dest => dest.GamePlatforms, opt => opt.Ignore());
+            CreateMap<Game, GameUpdateDTO>();
+            CreateMap<GameUpdateDTO, Game>();
             CreateMap<Platform, PlatformDTO>();
                 
         }

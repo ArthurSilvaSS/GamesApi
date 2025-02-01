@@ -2,6 +2,7 @@
 using GamesAPI.Data;
 using GamesAPI.DTOs.Games;
 using GamesAPI.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 
 namespace GamesAPI.Services.Games
@@ -116,6 +117,43 @@ namespace GamesAPI.Services.Games
                 .LoadAsync();
 
             return _mapper.Map<GameDetailsDTO>(gameToUpdate);
+        }
+        public async Task<GameDetailsDTO> PartialUpdateGame(int id, JsonPatchDocument<GameUpdateDTO> patchDoc)
+        {
+            var game = await _context.Games
+                .Include(g => g.GamePlatforms)
+                .FirstOrDefaultAsync(g => g.Id == id);
+
+            if (game == null)
+                return null;
+
+            var gameUpdateDTO = _mapper.Map<GameUpdateDTO>(game);
+            patchDoc.ApplyTo(gameUpdateDTO);
+
+            _mapper.Map(gameUpdateDTO, game);
+
+            if (gameUpdateDTO.PlatformIds != null)
+            {
+               _context.GamePlatforms.RemoveRange(game.GamePlatforms);
+
+                game.GamePlatforms = gameUpdateDTO.PlatformIds
+                    .Select(platformId => new GamePlatform
+                    {
+                        GameId = game.Id,
+                        PlatformId = platformId
+                    })
+                    .ToList();
+            }
+
+            await _context.SaveChangesAsync();
+
+            await _context.Entry(game)
+                .Collection(g => g.GamePlatforms)
+                .Query()
+                .Include(gp => gp.Platform)
+                .LoadAsync();
+
+            return _mapper.Map<GameDetailsDTO>(game);
         }
         public async Task<bool> DeleteGame(int id)
         {
