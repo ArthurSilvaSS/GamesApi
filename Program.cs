@@ -1,6 +1,7 @@
 using GamesAPI.Data;
 using GamesAPI.Middlewares;
 using GamesAPI.Services;
+using GamesAPI.Services.Platform;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,9 +21,11 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IGameService, GameService>();
-builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IPlatformService, PlatformService>();
+builder.Services.AddControllers().AddNewtonsoftJson();
+
 
 var app = builder.Build();
 
