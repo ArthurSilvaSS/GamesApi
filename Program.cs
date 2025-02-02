@@ -6,6 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularApp",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200")
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 //Entity Framework and MySQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -40,6 +52,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 app.UseMiddleware<ExeptionHandlingMiddleware>();
+app.UseCors("AllowAngularApp");
 
 app.UseHttpsRedirection();
 
