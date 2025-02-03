@@ -4,6 +4,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
     public class JwtService
     {
+        private readonly IConfiguration _configuration;
+
         private readonly string _secret;
         private readonly string _issuer;
         private readonly string _audience;
@@ -11,7 +13,9 @@ using Microsoft.IdentityModel.Tokens;
 
         public JwtService(IConfiguration configuration)
         {
-            _secret = configuration["Jwt:Secret"];
+            _configuration = configuration;
+
+            _secret = configuration["Jwt:SecretKey"];
             _issuer = configuration["Jwt:Issuer"];
             _audience = configuration["Jwt:Audience"];
             _expiryInMinutes = Convert.ToInt32(configuration["Jwt:ExpiryInMinutes"]);

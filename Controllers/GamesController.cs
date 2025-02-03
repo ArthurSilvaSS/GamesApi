@@ -3,6 +3,7 @@ using GamesAPI.Data;
 using GamesAPI.DTOs.Games;
 using GamesAPI.Models;
 using GamesAPI.Services.Games;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace GamesAPI.Controllers
             _gameService = gameService;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameDetailsDTO>>> GetAllGames()
         {

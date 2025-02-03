@@ -91,6 +91,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddScoped<JwtService>();
 
 
 var app = builder.Build();
