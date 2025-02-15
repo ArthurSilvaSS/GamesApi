@@ -92,6 +92,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IPlatformService, PlatformService>();
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 
 var app = builder.Build();
