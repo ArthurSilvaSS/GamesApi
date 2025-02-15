@@ -35,24 +35,25 @@ public class UserService : IUserService
     public async Task<UserModel> AuthenticateAsync(string email, string password)
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-        if (user == null && VerifyPassword(password, user.PasswordHash))
-        {
-            return user;
-        }
-        return null;
+
+        if (user == null)
+           return null;
+        if (!VerifyPassword(password, user.PasswordHash))
+            return null;
+
+        return user;
     }
     private string HashPassword(string password)
     {
-        using (var sha256 = SHA256.Create())
-        {
-            byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(bytes);
-        }
+        var passwordHasher = new PasswordHasher<UserModel>();
+        return passwordHasher.HashPassword(null, password);
     }
 
     private bool VerifyPassword(string password, string storedHash)
     {
-        return HashPassword(password) == storedHash;
+        var passwordHasher = new PasswordHasher<UserModel>();
+        return passwordHasher
+            .VerifyHashedPassword(null, storedHash, password) == PasswordVerificationResult.Success;
     }
 }
 

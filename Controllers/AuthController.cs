@@ -1,6 +1,9 @@
 ﻿using GamesAPI.DTOs.Authentication;
+using GamesAPI.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -23,9 +26,8 @@ public class AuthController : ControllerBase
         try
         {
             var user = await _userService.RegisterUserAsync(request);
-            // Opcionalmente, gere um token logo após o registro
             var token = _jwtService.GenerateToken(user.Id.ToString(), user.Email);
-            return Ok(new { Message = "Usuário criado com sucesso!", Token = token });
+            return Ok(new { Message = "User created successfully!", Token = token });
         }
         catch (Exception ex)
         {
@@ -34,13 +36,15 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        if (request.Email == "admin@admin.com" && request.Password == "admin")
+        var user = await _userService.AuthenticateAsync(request.Email, request.Password);
+
+        if (user == null)
         {
-            var token = _jwtService.GenerateToken("123", request.Email);
-            return Ok(new {Token = token});
+            return Unauthorized("Invalid email or password");
         }
-        return Unauthorized();
+        var token = _jwtService.GenerateToken(user.Id.ToString(), user.Email);
+        return Ok(new { Token = token });
     }
 }
