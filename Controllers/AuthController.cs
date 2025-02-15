@@ -23,10 +23,3 @@ public class AuthController : ControllerBase
         return Unauthorized();
     }
 }
-
-public class LoginRequest
-{
-    public string Email { get; set; }
-    public string Password { get; set; }
-}
-
