@@ -1,5 +1,6 @@
 using System.Text;
 using GamesAPI.Data;
+using GamesAPI.DTOs.Authentication;
 using GamesAPI.Middlewares;
 using GamesAPI.Services.Games;
 using GamesAPI.Services.Platform;
