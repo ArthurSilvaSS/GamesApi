@@ -10,6 +10,7 @@ public interface IUserService
 {
     Task<UserModel> RegisterUserAsync(RegisterUserDto request);
     Task<UserModel> AuthenticateAsync(string email, string password);
+    Task<IEnumerable<UserDto>> GetUsersAsync();
 }
 
 public class UserService : IUserService
@@ -37,7 +38,7 @@ public class UserService : IUserService
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
 
         if (user == null)
-           return null;
+            return null;
         if (!VerifyPassword(password, user.PasswordHash))
             return null;
 
@@ -55,5 +56,15 @@ public class UserService : IUserService
         return passwordHasher
             .VerifyHashedPassword(null, storedHash, password) == PasswordVerificationResult.Success;
     }
+    public async Task<IEnumerable<UserDto>> GetUsersAsync()
+    {
+        return await _context.Users.Select(u => new UserDto
+        {
+            Id = u.Id,
+            Email = u.Email
+        }).ToListAsync();
+
+    }
+
 }
 

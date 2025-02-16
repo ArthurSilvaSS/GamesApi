@@ -47,4 +47,11 @@ public class AuthController : ControllerBase
         var token = _jwtService.GenerateToken(user.Id.ToString(), user.Email);
         return Ok(new { Token = token });
     }
+
+    [HttpGet("users")]
+    public async Task<IActionResult> GetUsers()
+    {
+        var users = await _userService.GetUsersAsync();
+        return Ok(users);
+    }
 }
